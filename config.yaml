@@ -1,0 +1,8 @@
+Data:
+  dataset_path: ./dataset/
+  train_folder: train
+  val_folder: valid
+  test_folder: test
+Train:
+  batch_size: 100
+  num_epochs: 1
