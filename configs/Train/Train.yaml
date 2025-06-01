@@ -1,4 +1,4 @@
-model_choice: own_light # own (собственная архитектура), dp (базовая модель с fc слоями в конце), own_light(легкая модель для быстрого теста)
+model_choice: dp # own (собственная архитектура), dp (базовая модель с fc слоями в конце)
 base_model: resnet18 # Базовая модель для dp
 
 batch_size: 100

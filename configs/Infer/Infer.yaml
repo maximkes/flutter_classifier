@@ -1,0 +1,2 @@
+#checkpoint_file: checkpoints/epoch=00-val_loss=1.4078.ckpt
+infer_image: dataset/TEST/ADONIS/1.jpg

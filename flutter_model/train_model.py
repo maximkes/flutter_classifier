@@ -79,6 +79,7 @@ def train_model(config, train_loader, validation_loader, test_loader):
         sample_batch = next(iter(test_loader))
         sample_input = sample_batch[0]
         Path(onnx_path).parent.mkdir(parents=True, exist_ok=True)
+
         model.to_onnx(onnx_path, sample_input, export_params=True)
         print(f"Model exported to ONNX and saved at {onnx_path}")
     return model, trainer

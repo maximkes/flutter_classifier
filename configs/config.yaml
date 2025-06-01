@@ -3,3 +3,4 @@ defaults:
   - Train: Train
   - Model: Model
   - DataLoader: DataLoader
+  - Infer: Infer

@@ -65,22 +65,24 @@ class LitModel(pl.LightningModule):
         """Build ResNet model with frozen weights and 3 FC layers"""
         # Load pretrained ResNet based on configuration
         if base_model_name.lower() == 'resnet18':
-            self.backbone = models.resnet18(pretrained=True)
+            self.backbone = models.resnet18(weights=models.ResNet18_Weights.IMAGENET1K_V1)
             num_features = 512
         elif base_model_name.lower() == 'resnet34':
-            self.backbone = models.resnet34(pretrained=True)
+            self.backbone = models.resnet34(weights=models.ResNet34_Weights.IMAGENET1K_V1)
             num_features = 512
         elif base_model_name.lower() == 'resnet50':
-            self.backbone = models.resnet50(pretrained=True)
+            self.backbone = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V1)
             num_features = 2048
         elif base_model_name.lower() == 'resnet101':
-            self.backbone = models.resnet101(pretrained=True)
+            self.backbone = models.resnet101(weights=models.ResNet101_Weights.IMAGENET1K_V1)
             num_features = 2048
         elif base_model_name.lower() == 'resnet152':
-            self.backbone = models.resnet152(pretrained=True)
+            self.backbone = models.resnet152(weights=models.ResNet152_Weights.IMAGENET1K_V1)
             num_features = 2048
         else:
             raise ValueError(f"Unsupported base model: {base_model_name}")
+
+    # Rest of your code remains the same...
 
         # Freeze all parameters in the backbone
         for param in self.backbone.parameters():
@@ -102,7 +104,7 @@ class LitModel(pl.LightningModule):
 
     def _build_lightweight_model(self, num_classes):
         """Build lightweight own_light model for efficient deployment"""
-        self.backbone = models.mobilenet_v2(pretrained=True)
+        self.backbone = models.mobilenet_v2(weights=models.MobileNet_V2_Weights.IMAGENET1K_V1)
 
         # Get number of features from the existing classifier
         num_features = self.backbone.classifier[1].in_features
