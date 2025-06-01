@@ -22,7 +22,7 @@ poetry install
 
 ### 1. Data Loading
 
-Датасет будет загружен из google диска, это займет несколько минут.
+Датасет будет загружен из яндекс диска, это может занять.
 
 ```bash
 poetry run python download_data.py
@@ -38,34 +38,31 @@ dvc push
 
 Для запуска обучения
 
-1. Отредактируйте config
+1. Отредактируйте `/config/Train/Train.yaml`
 2. Запустите сервер mlflow
 
 ```bash
 mlflow server --host 127.0.0.1 --port 8080
 ```
 
-или поставьте `config['Train']['use_MLFlow'] = False`
+или поставьте `configs['Train']['use_MLFlow'] = False`
 
 3. Запустите процесс обучения
 
 ```bash
 poetry run python train.py
+
 ```
 
-## Infer
+Чекпойнты сохраняются по умолчанию в папку `checkpoint/`, onnx по умолчанию
+сохраняется в файл `onnx_export/model.onnx`
 
-After training the model, you can use it for inference on new data. Set a path
-to test data in hydra configuration, the same as in train.
+## 3. Infer
 
-### Running Inference
-
-```bash
-poetry run python3 -m wikics_segment_prediction.infer
-```
-
-This will output predictions for each class per node.
-
-## Contact
-
-Project author: [sergstan1](https://github.com/sergstan1)
+1. Отредактируйте `/configs/Infer/Infer.yaml`, укажите чекпойнт и изображение,
+   которе хотите использовать. Если не указать чекпойнт, то автоматически будет
+   выбран лучший в папке.
+2. Запустите
+3. ```
+   poetry run python infer.py
+   ```
