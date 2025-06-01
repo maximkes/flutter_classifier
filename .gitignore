@@ -186,3 +186,6 @@ mlruns/
 outputs/
 tmp
 /checkpoints
+*.onnx
+onnx*
+onnx_export/

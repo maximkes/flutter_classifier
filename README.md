@@ -1,31 +1,71 @@
 # flutter_classifier
 
-\*\*#### Setup
+### Требования
 
-Создание .env
+- Python 3.12
+- [Poetry](https://python-poetry.org/docs/) for environment management
 
+### Setup
+
+1. Склонируйте репозиторий
+
+```bash
+git clone https://github.com/maximkes/flutter_classifier.git
+cd flutter_classifier
 ```
-python3 -m venv .venv
-source .venv/bin/activate
+
+2. Устанивте зависимости, используя Poetry:
+
+```bash
+poetry install
 ```
 
-Скачайте kaggle.json из раздела api по [ссылке](https://www.kaggle.com/settings)
-и положите его в папку `Users/<имя пользователя>/.kaggle`
+### 1. Data Loading
 
+Датасет будет загружен из google диска, это займет несколько минут.
+
+```bash
+poetry run python download_data.py
+```
+
+Сохраните в dvc
+
+```bash
+dvc push
+```
+
+## 2. Train
+
+Для запуска обучения
+
+1. Отредактируйте config
+2. Запустите сервер mlflow
+
+```bash
 mlflow server --host 127.0.0.1 --port 8080
+```
 
-#### Train
+или поставьте `config['Train']['use_MLFlow'] = False`
 
-Должен присутствовать раздел Train, в котором рассказано, как запустить
-тренировку вашей модели. Если у вас есть несколько этапов (загрузка данных,
-preprocessing, несколько вариантов модели и проч), нужно описать каждый из них.
-Обязательно привести команды, которыми нужно запускать то или иное действие
-потому как мы обсуждали разные варианты работы с CLI)
+3. Запустите процесс обучения
 
-#### Infer
+```bash
+poetry run python train.py
+```
 
-Смысл тот же, что и у Train, но тут должно быть описано, как после тренировки
-запустить модель на новых данных. Также нужно описать формат таких данных, дать
-пример (можно в виде артефакта в вашем data storage).
+## Infer
 
-\*\*
+After training the model, you can use it for inference on new data. Set a path
+to test data in hydra configuration, the same as in train.
+
+### Running Inference
+
+```bash
+poetry run python3 -m wikics_segment_prediction.infer
+```
+
+This will output predictions for each class per node.
+
+## Contact
+
+Project author: [sergstan1](https://github.com/sergstan1)

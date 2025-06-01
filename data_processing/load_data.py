@@ -4,6 +4,7 @@ import shutil
 from pathlib import Path
 
 import kagglehub
+import torch
 import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
@@ -15,64 +16,77 @@ def load_dataset_from_kagle(config):
         dataset_path.mkdir(parents=True, exist_ok=True)
 
         # Download latest version
-        print('Loading data rom Kaggle')
+        print("Loading data rom Kaggle")
         cache_path = kagglehub.dataset_download("gpiosenka/butterfly-images40-species")
 
         shutil.copytree(cache_path, dataset_path, dirs_exist_ok=True)
         print(f"Dataset loaded to {dataset_path} from Kaggle")
     else:
-        print(f'{dataset_path} found')
+        print(f"{dataset_path} found")
 
 
 def create_data_loaders(config):
     # Calculate optimal workers based on CPU count
-    num_workers = min(os.cpu_count(), config['DataLoader']['num_workers']) if os.cpu_count() else 0  # Cap at 8 workers
+    num_workers = (
+        min(os.cpu_count(), config["DataLoader"]["num_workers"])
+        if os.cpu_count()
+        else 0
+    )  # Cap at 8 workers
 
     # Define transforms
-    image_size = 224
-    imagenet_stats = ast.literal_eval(config['DataLoader']['imagenet_stats'])  # ([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    image_size = config['Data']['image_size']
+    imagenet_stats = ast.literal_eval(
+        config["DataLoader"]["imagenet_stats"]
+    )  # ([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 
     transformations = {
-        "train": transforms.Compose([
-            transforms.Resize(image_size),
-            transforms.ToTensor(),
-            transforms.Normalize(*imagenet_stats),
-        ]),
-        "validation": transforms.Compose([
-            transforms.Resize(image_size),
-            transforms.ToTensor(),
-            transforms.Normalize(*imagenet_stats),
-        ]),
-        "test": transforms.Compose([
-            transforms.Resize(image_size),
-            transforms.ToTensor(),
-            transforms.Normalize(*imagenet_stats),
-        ]),
+        "train": transforms.Compose(
+            [
+                transforms.Resize(image_size),
+                transforms.ToTensor(),
+                transforms.Normalize(*imagenet_stats),
+            ]
+        ),
+        "validation": transforms.Compose(
+            [
+                transforms.Resize(image_size),
+                transforms.ToTensor(),
+                transforms.Normalize(*imagenet_stats),
+            ]
+        ),
+        "test": transforms.Compose(
+            [
+                transforms.Resize(image_size),
+                transforms.ToTensor(),
+                transforms.Normalize(*imagenet_stats),
+            ]
+        ),
     }
 
     dataset_path = Path(config["Data"]["dataset_path"])
     batch_size = config["Train"]["batch_size"]
 
+    device = torch.device("mps" if torch.backends.mps.is_available() else "cuda" if torch.cuda.is_available() else "cpu")
+
     # Configure DataLoader parameters
     loader_args = {
         "batch_size": batch_size,
         "num_workers": num_workers,
-        "pin_memory": True,  # Enable fast GPU transfer
-        "persistent_workers": num_workers > 0  # Maintain workers between epochs
+        "pin_memory": device.type == "cuda",
+        "persistent_workers": num_workers > 0,
     }
 
     # Initialize datasets
     train = torchvision.datasets.ImageFolder(
         dataset_path / config["Data"]["train_folder"],
-        transform=transformations["train"]
+        transform=transformations["train"],
     )
     validation = torchvision.datasets.ImageFolder(
         dataset_path / config["Data"]["val_folder"],
-        transform=transformations["validation"]
+        transform=transformations["validation"],
     )
     test = torchvision.datasets.ImageFolder(
-        dataset_path / config["Data"]["test_folder"],
-        transform=transformations["test"]
+        dataset_path / config["Data"]["test_folder"], transform=transformations["test"]
     )
 
     # Create data loaders with optimized settings

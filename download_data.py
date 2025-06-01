@@ -36,16 +36,18 @@ class DataDownloader:
 
         # Find gdown installation path
         gdown_path = os.path.dirname(gdown.__file__)
-        download_folder_file = os.path.join(gdown_path, 'download_folder.py')
+        download_folder_file = os.path.join(gdown_path, "download_folder.py")
 
         # Read and modify the file
-        with open(download_folder_file, 'r') as f:
+        with open(download_folder_file, "r") as f:
             content = f.read()
 
         # Change the limit from 50 to a higher number
-        modified_content = content.replace('MAX_NUMBER_FILES = 50', 'MAX_NUMBER_FILES = 10000')
+        modified_content = content.replace(
+            "MAX_NUMBER_FILES = 50", "MAX_NUMBER_FILES = 10000"
+        )
 
-        with open(download_folder_file, 'w') as f:
+        with open(download_folder_file, "w") as f:
             f.write(modified_content)
 
         print("✅ Modified gdown file limit to 10000")
@@ -67,12 +69,11 @@ class DataDownloader:
             except gdown.exceptions.FileURLRetrievalError as e:
                 if "many accesses" in str(e) and attempt < max_retries - 1:
                     # Rate limiting detected
-                    delay = base_delay * (2 ** attempt) + random.randint(0, 30)
+                    delay = base_delay * (2**attempt) + random.randint(0, 30)
                     print(f"⚠️ Rate limited. Waiting {delay} seconds before retry...")
                     time.sleep(delay)
                 else:
                     print(f"❌ Permission or access error: {e}")
-                    self.print_manual_solutions()
                     raise
 
             except Exception as e:
@@ -83,13 +84,10 @@ class DataDownloader:
                     raise
 
 
-@hydra.main(version_base=None, config_path="conf", config_name='config')
+@hydra.main(version_base=None, config_path="configs", config_name="config")
 def load_dataset(config: DictConfig):
     # Configuration for the dataset
-    downloader = DataDownloader(
-        config['Data']['google_drive_folder'],
-        config
-    )
+    downloader = DataDownloader(config["Data"]["google_drive_folder"], config)
     downloader.download_data()
 
 

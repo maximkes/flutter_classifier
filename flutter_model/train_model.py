@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import lightning as L
 from lightning.pytorch.callbacks import (DeviceStatsMonitor, EarlyStopping,
                                          LearningRateMonitor, ModelCheckpoint,
@@ -13,21 +15,21 @@ def train_model(config, train_loader, validation_loader, test_loader):
     """
 
     # Initialize the Lightning model
-    model = LitModel(num_classes=100, learning_rate=0.001)
+    model = LitModel(num_classes=100, config=config)
 
     # Configure callbacks
     loggers = []
     if config["Train"]["use_MLFlow"]:
-        loggers.append(
-            MLFlowLogger(
-                experiment_name=config["Train"]["MLFlow_experiment_name"],
-                run_name=config["Train"]["MLFlow_run_name"],
-                save_dir=config["Train"]["MLFlow_save_dir"],  # More explicit directory
-                tracking_uri=config["Train"][
-                    "MLFlow_tracking_uri"
-                ],  # HTTP instead of HTTPS
-            )
+        mlflow_logger = MLFlowLogger(
+            experiment_name=config["Train"]["MLFlow_experiment_name"],
+            run_name=config["Train"]["MLFlow_run_name"],
+            save_dir=config["Train"]["MLFlow_save_dir"],
+            tracking_uri=config["Train"][
+                "MLFlow_tracking_uri"
+            ],  # HTTP instead of HTTPS
         )
+        mlflow_logger.log_hyperparams(config)
+        loggers.append(mlflow_logger)
 
     checkpoint_callback = ModelCheckpoint(
         monitor="val_loss",
@@ -72,4 +74,11 @@ def train_model(config, train_loader, validation_loader, test_loader):
     # Load best checkpoint and test
     trainer.test(ckpt_path="best", dataloaders=test_loader)
 
+    if config.get("Export", {}).get("enable_onnx_export", True):
+        onnx_path = config['Train']['onnx_path']
+        sample_batch = next(iter(test_loader))
+        sample_input = sample_batch[0]
+        Path(onnx_path).parent.mkdir(parents=True, exist_ok=True)
+        model.to_onnx(onnx_path, sample_input, export_params=True)
+        print(f"Model exported to ONNX and saved at {onnx_path}")
     return model, trainer

@@ -4,3 +4,5 @@ val_folder: valid
 test_folder: test
 
 google_drive_folder: https://drive.google.com/drive/folders/1Jo7n96yblWOCoW2ILh8f4QG_jJhs2zFC?usp=share_link
+
+image_size: 224
