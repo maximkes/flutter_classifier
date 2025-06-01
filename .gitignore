@@ -189,3 +189,4 @@ tmp
 *.onnx
 onnx*
 onnx_export/
+*.zip
