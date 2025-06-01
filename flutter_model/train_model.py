@@ -32,7 +32,7 @@ def train_model(config, train_loader, validation_loader, test_loader):
     checkpoint_callback = ModelCheckpoint(
         monitor="val_loss",
         dirpath=config["Train"]["checkpoints_dirpath"],
-        filename="{epoch: 02d}-{val_loss: .4f}",
+        filename="{epoch:02d}-{val_loss:.4f}",
         save_top_k=5,
         mode="min",
         every_n_epochs=1,

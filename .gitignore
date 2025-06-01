@@ -179,8 +179,10 @@ dataset/
 !dataset/.dvc
 *.jpg
 checkpoints/
+!checkpoints/.dvc
 lightning_logs/
 mlruns/
 /dataset
 outputs/
 tmp
+/checkpoints
