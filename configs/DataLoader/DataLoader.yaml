@@ -1,2 +1,4 @@
 imagenet_stats: ([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 num_workers: 8
+
+yandex_link: https://disk.360.yandex.ru/d/mM-efx10M5XHCg

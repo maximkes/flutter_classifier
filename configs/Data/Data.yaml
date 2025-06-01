@@ -3,6 +3,4 @@ train_folder: train
 val_folder: valid
 test_folder: test
 
-yandex_link: https://disk.360.yandex.ru/d/mM-efx10M5XHCg
-
 image_size: 224

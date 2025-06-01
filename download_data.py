@@ -26,7 +26,7 @@ def download_with_progress(url):
 
 @hydra.main(version_base=None, config_path="configs", config_name="config")
 def main(config: DictConfig):
-    url = config['Data']['yandex_link']
+    url = config['DataLoader']['yandex_link']
     base_url = 'https://cloud-api.yandex.net/v1/disk/public/resources/download?'
     final_url = base_url + urlencode(dict(public_key=url))
 
