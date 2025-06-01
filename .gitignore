@@ -176,9 +176,11 @@ cython_debug/
 
 kaggle.json
 dataset/
+!dataset/.dvc
 *.jpg
 checkpoints/
 lightning_logs/
 mlruns/
 /dataset
 outputs/
+tmp

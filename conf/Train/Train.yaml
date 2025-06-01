@@ -1,2 +1,11 @@
 batch_size: 100
-num_epochs: 10
+num_epochs: 1
+learning_rate: 0.001
+
+use_MLFlow: True
+MLFlow_experiment_name: flutter_classifier
+MLFlow_run_name: conv_classifier
+MLFlow_save_dir: ./mlflow_logs
+MLFlow_tracking_uri: http://127.0.0.1:8080
+
+checkpoints_dirpath: checkpoints/
