@@ -1,0 +1,5 @@
+defaults:
+  - Data: Data
+  - Train: Train
+  - Model: Model
+  - DataLoader: DataLoader

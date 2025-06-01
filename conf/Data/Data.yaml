@@ -1,0 +1,4 @@
+dataset_path: ./dataset/
+train_folder: train
+val_folder: valid
+test_folder: test

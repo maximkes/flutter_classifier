@@ -1,23 +1,16 @@
-import yaml
+import hydra
+from omegaconf import DictConfig
 
-from data_processing.load_data import (load_data_from_folders,
+from data_processing.load_data import (create_data_loaders,
                                        load_dataset_from_kagle)
 from flutter_model.train_model import train_model
 
 
-def main():
-    with open("config.yaml", "r") as file:
-        config = yaml.safe_load(file)
+@hydra.main(version_base=None, config_path="conf", config_name='config')
+def main(config: DictConfig):
 
     load_dataset_from_kagle(config)
-    (
-        train,
-        train_loader,
-        validation,
-        validation_loader,
-        test,
-        test_loader,
-    ) = load_data_from_folders(config)
+    train_loader, validation_loader, test_loader = create_data_loaders(config)
     train_model(config, train_loader, validation_loader, test_loader)
 
 

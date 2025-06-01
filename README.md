@@ -12,6 +12,8 @@ source .venv/bin/activate
 Скачайте kaggle.json из раздела api по [ссылке](https://www.kaggle.com/settings)
 и положите его в папку `Users/<имя пользователя>/.kaggle`
 
+mlflow server --host 127.0.0.1 --port 8080
+
 #### Train
 
 Должен присутствовать раздел Train, в котором рассказано, как запустить

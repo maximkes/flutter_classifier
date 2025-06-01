@@ -172,8 +172,13 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+
 kaggle.json
-
-
 dataset/
 *.jpg
+checkpoints/
+lightning_logs/
+mlruns/
+/dataset
+outputs/

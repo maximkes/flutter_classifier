@@ -1,120 +1,74 @@
-import torch
-import torch.nn as nn
-import torch.optim as optim
-from tqdm import tqdm, trange
+import lightning as L
+from lightning.pytorch.callbacks import (DeviceStatsMonitor, EarlyStopping,
+                                         LearningRateMonitor, ModelCheckpoint,
+                                         RichModelSummary)
+from lightning.pytorch.loggers import MLFlowLogger
 
-from .model import Model
+from .model import LitModel
 
 
 def train_model(config, train_loader, validation_loader, test_loader):
-    Mymodel = Model()
-    print("Model created")
-    # Move model to GPU if available
-    device = torch.device("mps")  # if torch.cuda.is_available() else "cpu")
-    print(device)
-    Mymodel.to(device)
+    """
+    Advanced training with additional Lightning features
+    """
 
-    # Define loss function and optimizer
-    criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(Mymodel.parameters(), lr=0.001)
+    # Initialize the Lightning model
+    model = LitModel(num_classes=100, learning_rate=0.001)
 
-    (
-        train_loss_history1,
-        train_acc_history1,
-        val_loss_history1,
-        val_acc_history1,
-    ) = _train_cycle(
-        Mymodel,
-        train_loader,
-        validation_loader,
-        criterion,
-        optimizer,
-        device,
-        epochs=config["Train"]["num_epochs"],
+    # Configure callbacks
+    loggers = [
+        MLFlowLogger(
+            experiment_name="flutter_classifier",
+            run_name="conv_classifier",
+            save_dir="./mlflow_logs",  # More explicit directory
+            tracking_uri="http://127.0.0.1:8080"  # HTTP instead of HTTPS
+        )
+    ]
+
+    checkpoint_callback = ModelCheckpoint(
+        monitor='val_loss',
+        dirpath='checkpoints/',
+        filename="{epoch: 02d}-{val_loss: .4f}",
+        save_top_k=5,
+        mode='min',
+        every_n_epochs=1,
+        every_n_train_steps=None
     )
 
-    # Evaluate the trained model
-    _evaluate_model(Mymodel, test_loader, device)
+    early_stop_callback = EarlyStopping(
+        monitor='val_loss',
+        min_delta=0.001,
+        patience=10,
+        mode='min'
+    )
 
+    callbacks = [
+        checkpoint_callback,
+        early_stop_callback,
+        LearningRateMonitor(logging_interval='step'),
+        DeviceStatsMonitor(),
+        RichModelSummary(max_depth=2)
+    ]
+    # Configure trainer with advanced features
+    trainer = L.Trainer(
+        max_epochs=config["Train"]["num_epochs"],
+        accelerator="auto",  # Automatically detect best accelerator
+        devices="auto",      # Automatically detect available devices
+        callbacks=callbacks,
+        logger=loggers,
+        enable_progress_bar=True,
+        enable_model_summary=True,
+        log_every_n_steps=10,
+        gradient_clip_val=1.0,  # Gradient clipping
+        accumulate_grad_batches=1,  # Gradient accumulation
+        fast_dev_run=False,   # Set to True for debugging
+        # val_check_interval=1.0
+    )
 
-def _train_cycle(
-    model, train_loader, validation_loader, criterion, optimizer, device, epochs=5
-):
-    train_acc_history = []
-    val_acc_history = []
-    train_loss_history = []
-    val_loss_history = []
+    # Train the model
+    trainer.fit(model, train_loader, validation_loader)
 
-    for epoch in trange(epochs):
-        # Training phase
-        model.train()
-        correct, total = 0, 0
-        running_train_loss = 0.0  # Track total training loss
+    # Load best checkpoint and test
+    trainer.test(ckpt_path="best", dataloaders=test_loader)
 
-        for images, labels in tqdm(train_loader):
-            images, labels = images.to(device), labels.to(device)
-
-            # Forward pass
-            outputs = model(images)
-            loss = criterion(outputs, labels)
-            running_train_loss += loss.item()  # Accumulate loss
-
-            # Backpropagation
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-
-            # Compute training accuracy
-            _, preds = torch.max(outputs, 1)
-            correct += (preds == labels).sum().item()
-            total += labels.size(0)
-
-        # Compute average training loss & accuracy
-        train_loss = running_train_loss / len(train_loader)
-        train_acc = correct / total
-        train_loss_history.append(train_loss)
-        train_acc_history.append(train_acc)
-
-        # Validation phase
-        model.eval()
-        correct, total = 0, 0
-        running_val_loss = 0.0  # Track total validation loss
-
-        with torch.no_grad():
-            for images, labels in validation_loader:
-                images, labels = images.to(device), labels.to(device)
-                outputs = model(images)
-                loss = criterion(outputs, labels)
-                running_val_loss += loss.item()  # Accumulate loss
-
-                _, preds = torch.max(outputs, 1)
-                correct += (preds == labels).sum().item()
-                total += labels.size(0)
-
-        # Compute average validation loss & accuracy
-        val_loss = running_val_loss / len(validation_loader)
-        val_acc = correct / total
-        val_loss_history.append(val_loss)
-        val_acc_history.append(val_acc)
-
-        print(
-            f"Epoch {epoch + 1} / {epochs} - Train Loss: {train_loss:.4f}, Train Acc: {train_acc:.4f}, "
-            f"Val Loss: {val_loss:.4f}, Val Acc: {val_acc:.4f}"
-        )
-
-    return train_loss_history, train_acc_history, val_loss_history, val_acc_history
-
-
-def _evaluate_model(model, test_loader, device):
-    model.eval()
-    correct, total = 0, 0
-    with torch.no_grad():
-        for images, labels in test_loader:
-            images, labels = images.to(device), labels.to(device)
-            outputs = model(images)
-            _, preds = torch.max(outputs, 1)
-            correct += (preds == labels).sum().item()
-            total += labels.size(0)
-
-    test_acc = correct / total
-    print(f"Test Accuracy: {test_acc:.4f}")
+    return model, trainer
