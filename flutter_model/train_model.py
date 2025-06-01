@@ -1,9 +1,13 @@
 from pathlib import Path
 
 import lightning as L
-from lightning.pytorch.callbacks import (DeviceStatsMonitor, EarlyStopping,
-                                         LearningRateMonitor, ModelCheckpoint,
-                                         RichModelSummary)
+from lightning.pytorch.callbacks import (
+    DeviceStatsMonitor,
+    EarlyStopping,
+    LearningRateMonitor,
+    ModelCheckpoint,
+    RichModelSummary,
+)
 from lightning.pytorch.loggers import MLFlowLogger
 
 from .model import LitModel
@@ -75,7 +79,7 @@ def train_model(config, train_loader, validation_loader, test_loader):
     trainer.test(ckpt_path="best", dataloaders=test_loader)
 
     if config.get("Export", {}).get("enable_onnx_export", True):
-        onnx_path = config['Train']['onnx_path']
+        onnx_path = config["Train"]["onnx_path"]
         sample_batch = next(iter(test_loader))
         sample_input = sample_batch[0]
         Path(onnx_path).parent.mkdir(parents=True, exist_ok=True)

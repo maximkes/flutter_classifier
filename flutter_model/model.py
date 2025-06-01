@@ -9,22 +9,24 @@ class LitModel(pl.LightningModule):
     def __init__(self, config, num_classes=100):
         super().__init__()
         self.save_hyperparameters()
-        self.lr = config['Train']['learning_rate']
-        self.model_choice = config['Train']['model_choice']
+        self.lr = config["Train"]["learning_rate"]
+        self.model_choice = config["Train"]["model_choice"]
 
-        if self.model_choice == 'own':
+        if self.model_choice == "own":
             self._build_original_model(num_classes)
 
-        elif self.model_choice == 'dp':
+        elif self.model_choice == "dp":
             # ResNet with frozen weights and 3 FC layers
-            base_model_name = config['Train']['base_model']
+            base_model_name = config["Train"]["base_model"]
             self._build_resnet_model(base_model_name, num_classes)
 
-        elif self.model_choice == 'own_light':
+        elif self.model_choice == "own_light":
             self._build_lightweight_model(num_classes)
 
         else:
-            raise ValueError(f"Invalid model_choice: {self.model_choice}. Choose 1, 2, or 3.")
+            raise ValueError(
+                f"Invalid model_choice: {self.model_choice}. Choose 1, 2, or 3."
+            )
 
         # Metrics
         self.train_acc = Accuracy(task="multiclass", num_classes=num_classes)
@@ -64,25 +66,35 @@ class LitModel(pl.LightningModule):
     def _build_resnet_model(self, base_model_name, num_classes):
         """Build ResNet model with frozen weights and 3 FC layers"""
         # Load pretrained ResNet based on configuration
-        if base_model_name.lower() == 'resnet18':
-            self.backbone = models.resnet18(weights=models.ResNet18_Weights.IMAGENET1K_V1)
+        if base_model_name.lower() == "resnet18":
+            self.backbone = models.resnet18(
+                weights=models.ResNet18_Weights.IMAGENET1K_V1
+            )
             num_features = 512
-        elif base_model_name.lower() == 'resnet34':
-            self.backbone = models.resnet34(weights=models.ResNet34_Weights.IMAGENET1K_V1)
+        elif base_model_name.lower() == "resnet34":
+            self.backbone = models.resnet34(
+                weights=models.ResNet34_Weights.IMAGENET1K_V1
+            )
             num_features = 512
-        elif base_model_name.lower() == 'resnet50':
-            self.backbone = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V1)
+        elif base_model_name.lower() == "resnet50":
+            self.backbone = models.resnet50(
+                weights=models.ResNet50_Weights.IMAGENET1K_V1
+            )
             num_features = 2048
-        elif base_model_name.lower() == 'resnet101':
-            self.backbone = models.resnet101(weights=models.ResNet101_Weights.IMAGENET1K_V1)
+        elif base_model_name.lower() == "resnet101":
+            self.backbone = models.resnet101(
+                weights=models.ResNet101_Weights.IMAGENET1K_V1
+            )
             num_features = 2048
-        elif base_model_name.lower() == 'resnet152':
-            self.backbone = models.resnet152(weights=models.ResNet152_Weights.IMAGENET1K_V1)
+        elif base_model_name.lower() == "resnet152":
+            self.backbone = models.resnet152(
+                weights=models.ResNet152_Weights.IMAGENET1K_V1
+            )
             num_features = 2048
         else:
             raise ValueError(f"Unsupported base model: {base_model_name}")
 
-    # Rest of your code remains the same...
+        # Rest of your code remains the same...
 
         # Freeze all parameters in the backbone
         for param in self.backbone.parameters():
@@ -99,33 +111,34 @@ class LitModel(pl.LightningModule):
             nn.Linear(512, 256),
             nn.ReLU(),
             nn.Dropout(0.3),
-            nn.Linear(256, num_classes)
+            nn.Linear(256, num_classes),
         )
 
     def _build_lightweight_model(self, num_classes):
         """Build lightweight own_light model for efficient deployment"""
-        self.backbone = models.mobilenet_v2(weights=models.MobileNet_V2_Weights.IMAGENET1K_V1)
+        self.backbone = models.mobilenet_v2(
+            weights=models.MobileNet_V2_Weights.IMAGENET1K_V1
+        )
 
         # Get number of features from the existing classifier
         num_features = self.backbone.classifier[1].in_features
 
         # Replace classifier with simplified version for efficiency
         self.backbone.classifier = nn.Sequential(
-            nn.Dropout(0.2),
-            nn.Linear(num_features, num_classes)
+            nn.Dropout(0.2), nn.Linear(num_features, num_classes)
         )
 
     def forward(self, x):
-        if self.model_choice == 'own':
+        if self.model_choice == "own":
             # Original model forward pass
             x = self.conv_layers(x)
             x = x.view(x.size(0), -1)
             x = self.fc_layers(x)
-        elif self.model_choice == 'dp':
+        elif self.model_choice == "dp":
             # ResNet forward pass with frozen backbone
             x = self.backbone(x)  # Features extracted, fc is Identity
             x = self.fc_layers(x)
-        elif self.model_choice == 'own_light':
+        elif self.model_choice == "own_light":
             x = self.backbone(x)
 
         return x

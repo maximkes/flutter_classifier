@@ -45,9 +45,9 @@ def find_best_checkpoint(checkpoints_dirpath):
             try:
                 return float(val_loss_str)
             except ValueError:
-                return float('inf')  # Return high value if conversion fails
+                return float("inf")  # Return high value if conversion fails
         else:
-            return float('inf')  # Return high value if no val_loss found
+            return float("inf")  # Return high value if no val_loss found
 
     best_checkpoint = min(checkpoint_files, key=extract_val_loss)
     return best_checkpoint
@@ -55,17 +55,19 @@ def find_best_checkpoint(checkpoints_dirpath):
 
 def get_checkpoint_path(config):
     """Get checkpoint path from config, with fallback to best checkpoint"""
-    checkpoint_file = config['Infer'].get('checkpoint_file')
+    checkpoint_file = config["Infer"].get("checkpoint_file")
 
     if checkpoint_file:
         # Use specified checkpoint file
         checkpoint_path = Path(checkpoint_file)
         if not checkpoint_path.exists():
-            raise FileNotFoundError(f"Specified checkpoint file not found: {checkpoint_path}")
+            raise FileNotFoundError(
+                f"Specified checkpoint file not found: {checkpoint_path}"
+            )
         return checkpoint_path
     else:
         # Find best checkpoint from directory
-        checkpoints_dirpath = config['Train']['checkpoints_dirpath']
+        checkpoints_dirpath = config["Train"]["checkpoints_dirpath"]
         return find_best_checkpoint(checkpoints_dirpath)
 
 
@@ -79,19 +81,19 @@ def load_and_preprocess_image(image_path, config):
         raise FileNotFoundError(f"Image file not found: {image_path}")
 
     # Get image size and normalization stats from config
-    image_size = config['Data']['image_size']
-    imagenet_stats = ast.literal_eval(
-        config["DataLoader"]["imagenet_stats"]
+    image_size = config["Data"]["image_size"]
+    imagenet_stats = ast.literal_eval(config["DataLoader"]["imagenet_stats"])
+
+    transform = transforms.Compose(
+        [
+            transforms.Resize((image_size, image_size)),
+            transforms.ToTensor(),
+            transforms.Normalize(*imagenet_stats),
+        ]
     )
 
-    transform = transforms.Compose([
-        transforms.Resize((image_size, image_size)),
-        transforms.ToTensor(),
-        transforms.Normalize(*imagenet_stats),
-    ])
-
     # Load and transform the image
-    image = Image.open(image_path).convert('RGB')
+    image = Image.open(image_path).convert("RGB")
     image_tensor = transform(image).unsqueeze(0)  # Add batch dimension
     return image_tensor
 
@@ -120,7 +122,7 @@ def main(config: DictConfig):
     model.eval()
 
     # Get image path from config
-    image_path = Path(config['Infer']['infer_image'])
+    image_path = Path(config["Infer"]["infer_image"])
 
     try:
         input_tensor = load_and_preprocess_image(image_path, config)
@@ -129,7 +131,13 @@ def main(config: DictConfig):
         return
 
     # Move to GPU if available
-    device = torch.device("mps" if torch.backends.mps.is_available() else "cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device(
+        "mps"
+        if torch.backends.mps.is_available()
+        else "cuda"
+        if torch.cuda.is_available()
+        else "cpu"
+    )
     model = model.to(device)
     input_tensor = input_tensor.to(device)
 

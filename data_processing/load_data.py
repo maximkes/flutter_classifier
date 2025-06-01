@@ -34,7 +34,7 @@ def create_data_loaders(config):
     )  # Cap at 8 workers
 
     # Define transforms
-    image_size = config['Data']['image_size']
+    image_size = config["Data"]["image_size"]
     imagenet_stats = ast.literal_eval(
         config["DataLoader"]["imagenet_stats"]
     )  # ([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
@@ -66,7 +66,13 @@ def create_data_loaders(config):
     dataset_path = Path(config["Data"]["dataset_path"])
     batch_size = config["Train"]["batch_size"]
 
-    device = torch.device("mps" if torch.backends.mps.is_available() else "cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device(
+        "mps"
+        if torch.backends.mps.is_available()
+        else "cuda"
+        if torch.cuda.is_available()
+        else "cpu"
+    )
 
     # Configure DataLoader parameters
     loader_args = {
