@@ -1,6 +1,6 @@
 from pathlib import Path
 
-import lightning as L
+import pytorch_lightning as pl
 from lightning.pytorch.callbacks import (
     DeviceStatsMonitor,
     EarlyStopping,
@@ -20,7 +20,6 @@ def train_model(config, train_loader, validation_loader, test_loader):
 
     # Initialize the Lightning model
     model = LitModel(num_classes=100, config=config)
-
     # Configure callbacks
     loggers = []
     if config["Train"]["use_MLFlow"]:
@@ -48,7 +47,6 @@ def train_model(config, train_loader, validation_loader, test_loader):
     early_stop_callback = EarlyStopping(
         monitor="val_loss", min_delta=0.001, patience=10, mode="min"
     )
-
     callbacks = [
         checkpoint_callback,
         early_stop_callback,
@@ -56,8 +54,8 @@ def train_model(config, train_loader, validation_loader, test_loader):
         DeviceStatsMonitor(),
         RichModelSummary(max_depth=2),
     ]
-    # Configure trainer with advanced features
-    trainer = L.Trainer(
+
+    trainer = pl.Trainer(
         max_epochs=config["Train"]["num_epochs"],
         accelerator="auto",  # Automatically detect best accelerator
         devices="auto",  # Automatically detect available devices
@@ -72,10 +70,8 @@ def train_model(config, train_loader, validation_loader, test_loader):
         # val_check_interval=1.0
     )
 
-    # Train the model
     trainer.fit(model, train_loader, validation_loader)
 
-    # Load best checkpoint and test
     trainer.test(ckpt_path="best", dataloaders=test_loader)
 
     if config.get("Export", {}).get("enable_onnx_export", True):
