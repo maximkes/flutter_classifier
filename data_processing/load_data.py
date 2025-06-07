@@ -8,7 +8,6 @@ import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 
 
-
 def create_data_loaders(config):
     # Calculate optimal workers based on CPU count
     num_workers = (

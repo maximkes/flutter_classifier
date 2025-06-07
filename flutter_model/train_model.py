@@ -1,17 +1,12 @@
 from pathlib import Path
 
 import lightning as L
-from lightning.pytorch.callbacks import (
-    DeviceStatsMonitor,
-    EarlyStopping,
-    LearningRateMonitor,
-    ModelCheckpoint,
-    RichModelSummary,
-)
+from lightning.pytorch.callbacks import (DeviceStatsMonitor, EarlyStopping,
+                                         LearningRateMonitor, ModelCheckpoint,
+                                         RichModelSummary)
 from lightning.pytorch.loggers import MLFlowLogger
 
 from .model import LitModel
-
 
 
 def train_model(config, train_loader, validation_loader, test_loader):
@@ -20,7 +15,7 @@ def train_model(config, train_loader, validation_loader, test_loader):
     """
 
     # Initialize the Lightning model
-    model = LitModel(num_classes=100, config=config)
+    model = LitModel(config=config)
     # Configure callbacks
     loggers = []
     if config["Train"]["use_MLFlow"]:
@@ -34,7 +29,6 @@ def train_model(config, train_loader, validation_loader, test_loader):
         )
         mlflow_logger.log_hyperparams(config)
 
-        
         loggers.append(mlflow_logger)
 
     checkpoint_callback = ModelCheckpoint(
@@ -48,7 +42,10 @@ def train_model(config, train_loader, validation_loader, test_loader):
     )
 
     early_stop_callback = EarlyStopping(
-        monitor="val_loss", min_delta=0.001, patience=10, mode="min"
+        monitor="val_loss",
+        min_delta=config["Train"]["earlystop_min_delta"],
+        patience=config["Train"]["earlystop_patiance"],
+        mode="min",
     )
     callbacks = [
         checkpoint_callback,
@@ -70,7 +67,7 @@ def train_model(config, train_loader, validation_loader, test_loader):
         gradient_clip_val=1.0,  # Gradient clipping
         accumulate_grad_batches=1,  # Gradient accumulation
         fast_dev_run=False,  # Set to True for debugging
-        val_check_interval=1.0
+        val_check_interval=1.0,
     )
 
     trainer.fit(model, train_loader, validation_loader)
