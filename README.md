@@ -1,11 +1,22 @@
 # flutter_classifier
 
+### Описание
+
+Проект выполняет классификацию бабочек и моли по изображениям.
+Проект загружает копию датасета из Яндекс диска при помощи `download_data.py`, обучает модель в `train.py`, также реализован модуль `infer.py`, позволяющий выполнять классификацию при помощи обученной модели.
+
+### Датасет
+
+Использован датасет [Butterfly &amp; Moths](https://www.kaggle.com/datasets/gpiosenka/butterfly-images40-species), содержащий 13594 изображений насекомых разных видов. Датасет разделен на 3 части: train (12594 изображений), validation (500 изображений), test (500 изображений). Каждая часть содержит 100 папок для каждого из видов.
+
 ### Требования
 
 - Python 3.12
 - [Poetry](https://python-poetry.org/docs/) for environment management
+- DVC (опционально)
+- 
 
-### Setup
+### Запуск
 
 1. Склонируйте репозиторий
 
@@ -57,12 +68,21 @@ poetry run python train.py
 Чекпойнты сохраняются по умолчанию в папку `checkpoint/`, onnx по умолчанию
 сохраняется в файл `onnx_export/model.onnx`
 
+4. (Опционально) Экспорт модели в tensort (необходим trtexec)
+```bash
+./convert_onnx_to_tensorrt.sh
+```
+или 
+```bash
+./convert_onnx_to_tensorrt.sh /custom/path/model.onnx
+```
+
 ## 3. Infer
 
 1. Отредактируйте `/configs/Infer/Infer.yaml`, укажите чекпойнт и изображение,
    которе хотите использовать. Если не указать чекпойнт, то автоматически будет
    выбран лучший в папке.
 2. Запустите
-3. ```
+3. ```bash
    poetry run python infer.py
    ```

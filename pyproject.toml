@@ -6,7 +6,7 @@ authors = [
     {name = "maximkes",email = "max_pechin@mail.ru"}
 ]
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.12,<4.0"
 dependencies = [
     "pandas (>=2.2.3,<3.0.0)",
     "torchvision (>=0.22.0,<0.23.0)",
@@ -20,7 +20,8 @@ dependencies = [
     "dvc (>=3.59.2,<4.0.0)",
     "gdown (>=5.2.0,<6.0.0)",
     "onnx (>=1.18.0,<2.0.0)",
-    "google-auth-oauthlib (>=1.2.2,<2.0.0)"
+    "google-auth-oauthlib (>=1.2.2,<2.0.0)",
+    "litmodels (>=0.1.8,<0.2.0)"
 ]
 
 

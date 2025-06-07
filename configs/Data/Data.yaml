@@ -4,3 +4,4 @@ val_folder: valid
 test_folder: test
 
 image_size: 224
+num_classes: 100

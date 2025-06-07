@@ -2,5 +2,5 @@
     remote = models
 ['remote "dataset"']
     url = /Users/maksimpecin/Documents/dvcstorage/dataset
-['remote "models"']
-    url = /Users/maksimpecin/Documents/dvcstorage/dataset
+['remote "checkpoints"']
+    url = /Users/maksimpecin/Documents/dvcstorage/checkpoints

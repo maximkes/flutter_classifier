@@ -1,6 +1,6 @@
 from pathlib import Path
 
-import pytorch_lightning as pl
+import lightning as L
 from lightning.pytorch.callbacks import (
     DeviceStatsMonitor,
     EarlyStopping,
@@ -11,6 +11,7 @@ from lightning.pytorch.callbacks import (
 from lightning.pytorch.loggers import MLFlowLogger
 
 from .model import LitModel
+
 
 
 def train_model(config, train_loader, validation_loader, test_loader):
@@ -32,6 +33,8 @@ def train_model(config, train_loader, validation_loader, test_loader):
             ],  # HTTP instead of HTTPS
         )
         mlflow_logger.log_hyperparams(config)
+
+        
         loggers.append(mlflow_logger)
 
     checkpoint_callback = ModelCheckpoint(
@@ -55,7 +58,7 @@ def train_model(config, train_loader, validation_loader, test_loader):
         RichModelSummary(max_depth=2),
     ]
 
-    trainer = pl.Trainer(
+    trainer = L.Trainer(
         max_epochs=config["Train"]["num_epochs"],
         accelerator="auto",  # Automatically detect best accelerator
         devices="auto",  # Automatically detect available devices
@@ -67,7 +70,7 @@ def train_model(config, train_loader, validation_loader, test_loader):
         gradient_clip_val=1.0,  # Gradient clipping
         accumulate_grad_batches=1,  # Gradient accumulation
         fast_dev_run=False,  # Set to True for debugging
-        # val_check_interval=1.0
+        val_check_interval=1.0
     )
 
     trainer.fit(model, train_loader, validation_loader)

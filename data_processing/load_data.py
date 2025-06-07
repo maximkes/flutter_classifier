@@ -1,28 +1,12 @@
 import ast
 import os
-import shutil
 from pathlib import Path
 
-import kagglehub
 import torch
 import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 
-
-def load_dataset_from_kagle(config):
-    dataset_path = Path(config["Data"]["dataset_path"])
-    if not dataset_path.exists():
-        dataset_path.mkdir(parents=True, exist_ok=True)
-
-        # Download latest version
-        print("Loading data rom Kaggle")
-        cache_path = kagglehub.dataset_download("gpiosenka/butterfly-images40-species")
-
-        shutil.copytree(cache_path, dataset_path, dirs_exist_ok=True)
-        print(f"Dataset loaded to {dataset_path} from Kaggle")
-    else:
-        print(f"{dataset_path} found")
 
 
 def create_data_loaders(config):
