@@ -11,15 +11,15 @@ from torch.utils.data import DataLoader
 def create_data_loaders(config):
     # Calculate optimal workers based on CPU count
     num_workers = (
-        min(os.cpu_count(), config["DataLoader"]["num_workers"])
+        min(os.cpu_count(), config["data_loader"]["num_workers"])
         if os.cpu_count()
         else 0
     )  # Cap at 8 workers
 
     # Define transforms
-    image_size = config["Data"]["image_size"]
+    image_size = config["data"]["image_size"]
     imagenet_stats = ast.literal_eval(
-        config["DataLoader"]["imagenet_stats"]
+        config["data_loader"]["imagenet_stats"]
     )  # ([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 
     transformations = {
@@ -46,8 +46,8 @@ def create_data_loaders(config):
         ),
     }
 
-    dataset_path = Path(config["Data"]["dataset_path"])
-    batch_size = config["Train"]["batch_size"]
+    dataset_path = Path(config["data"]["dataset_path"])
+    batch_size = config["train"]["batch_size"]
 
     device = torch.device(
         "mps"
@@ -67,17 +67,17 @@ def create_data_loaders(config):
 
     # Initialize datasets
     train = torchvision.datasets.ImageFolder(
-        dataset_path / config["Data"]["train_folder"],
+        dataset_path / config["data"]["train_folder"],
         transform=transformations["train"],
         allow_empty=True 
     )
     validation = torchvision.datasets.ImageFolder(
-        dataset_path / config["Data"]["val_folder"],
+        dataset_path / config["data"]["val_folder"],
         transform=transformations["validation"],
         allow_empty=True 
     )
     test = torchvision.datasets.ImageFolder(
-        dataset_path / config["Data"]["test_folder"], 
+        dataset_path / config["data"]["test_folder"], 
         transform=transformations["test"],
         allow_empty=True 
     )

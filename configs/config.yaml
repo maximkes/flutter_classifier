@@ -1,5 +1,5 @@
 defaults:
-  - Data: Data
-  - Train: Train
-  - DataLoader: DataLoader
-  - Infer: Infer
+  - data: data
+  - train: train
+  - data_loader: data_loader
+  - infer: infer

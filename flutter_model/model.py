@@ -9,15 +9,15 @@ class LitModel(pl.LightningModule):
     def __init__(self, config, num_classes=100):
         super().__init__()
         self.save_hyperparameters()
-        self.lr = config["Train"]["learning_rate"]
-        self.model_choice = config["Train"]["model_choice"]
+        self.lr = config["train"]["learning_rate"]
+        self.model_choice = config["train"]["model_choice"]
 
         if self.model_choice == "own":
             self._build_original_model(num_classes)
 
         elif self.model_choice == "dp":
             # ResNet with frozen weights and 3 FC layers
-            base_model_name = config["Train"]["base_model"]
+            base_model_name = config["train"]["base_model"]
             self._build_resnet_model(base_model_name, num_classes)
 
         elif self.model_choice == "own_light":

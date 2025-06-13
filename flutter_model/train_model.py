@@ -18,12 +18,12 @@ def train_model(config, train_loader, validation_loader, test_loader):
     model = LitModel(config=config)
     # Configure callbacks
     loggers = []
-    if config["Train"]["use_MLFlow"]:
+    if config["train"]["use_MLFlow"]:
         mlflow_logger = MLFlowLogger(
-            experiment_name=config["Train"]["MLFlow_experiment_name"],
-            run_name=config["Train"]["MLFlow_run_name"],
-            save_dir=config["Train"]["MLFlow_save_dir"],
-            tracking_uri=config["Train"][
+            experiment_name=config["train"]["MLFlow_experiment_name"],
+            run_name=config["train"]["MLFlow_run_name"],
+            save_dir=config["train"]["MLFlow_save_dir"],
+            tracking_uri=config["train"][
                 "MLFlow_tracking_uri"
             ],  # HTTP instead of HTTPS
         )
@@ -33,7 +33,7 @@ def train_model(config, train_loader, validation_loader, test_loader):
 
     checkpoint_callback = ModelCheckpoint(
         monitor="val_loss",
-        dirpath=config["Train"]["checkpoints_dirpath"],
+        dirpath=config["train"]["checkpoints_dirpath"],
         filename="{epoch:02d}-{val_loss:.4f}",
         save_top_k=5,
         mode="min",
@@ -43,8 +43,8 @@ def train_model(config, train_loader, validation_loader, test_loader):
 
     early_stop_callback = EarlyStopping(
         monitor="val_loss",
-        min_delta=config["Train"]["earlystop_min_delta"],
-        patience=config["Train"]["earlystop_patiance"],
+        min_delta=config["train"]["earlystop_min_delta"],
+        patience=config["train"]["earlystop_patiance"],
         mode="min",
     )
     callbacks = [
@@ -56,7 +56,7 @@ def train_model(config, train_loader, validation_loader, test_loader):
     ]
 
     trainer = L.Trainer(
-        max_epochs=config["Train"]["num_epochs"],
+        max_epochs=config["train"]["num_epochs"],
         accelerator="auto",  # Automatically detect best accelerator
         devices="auto",  # Automatically detect available devices
         callbacks=callbacks,
@@ -75,7 +75,7 @@ def train_model(config, train_loader, validation_loader, test_loader):
     trainer.test(ckpt_path="best", dataloaders=test_loader)
 
     if config.get("Export", {}).get("enable_onnx_export", True):
-        onnx_path = config["Train"]["onnx_path"]
+        onnx_path = config["train"]["onnx_path"]
         sample_batch = next(iter(test_loader))
         sample_input = sample_batch[0]
         Path(onnx_path).parent.mkdir(parents=True, exist_ok=True)

@@ -55,7 +55,7 @@ def find_best_checkpoint(checkpoints_dirpath):
 
 def get_checkpoint_path(config):
     """Get checkpoint path from config, with fallback to best checkpoint"""
-    checkpoint_file = config["Infer"].get("checkpoint_file")
+    checkpoint_file = config["infer"].get("checkpoint_file")
 
     if checkpoint_file:
         # Use specified checkpoint file
@@ -67,7 +67,7 @@ def get_checkpoint_path(config):
         return checkpoint_path
     else:
         # Find best checkpoint from directory
-        checkpoints_dirpath = config["Train"]["checkpoints_dirpath"]
+        checkpoints_dirpath = config["train"]["checkpoints_dirpath"]
         return find_best_checkpoint(checkpoints_dirpath)
 
 
@@ -81,8 +81,8 @@ def load_and_preprocess_image(image_path, config):
         raise FileNotFoundError(f"Image file not found: {image_path}")
 
     # Get image size and normalization stats from config
-    image_size = config["Data"]["image_size"]
-    imagenet_stats = ast.literal_eval(config["DataLoader"]["imagenet_stats"])
+    image_size = config["data"]["image_size"]
+    imagenet_stats = ast.literal_eval(config["data_loader"]["imagenet_stats"])
 
     transform = transforms.Compose(
         [
@@ -122,7 +122,7 @@ def main(config: DictConfig):
     model.eval()
 
     # Get image path from config
-    image_path = Path(config["Infer"]["infer_image"])
+    image_path = Path(config["infer"]["infer_image"])
 
     try:
         input_tensor = load_and_preprocess_image(image_path, config)
