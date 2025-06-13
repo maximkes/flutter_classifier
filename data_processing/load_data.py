@@ -69,13 +69,17 @@ def create_data_loaders(config):
     train = torchvision.datasets.ImageFolder(
         dataset_path / config["Data"]["train_folder"],
         transform=transformations["train"],
+        allow_empty=True 
     )
     validation = torchvision.datasets.ImageFolder(
         dataset_path / config["Data"]["val_folder"],
         transform=transformations["validation"],
+        allow_empty=True 
     )
     test = torchvision.datasets.ImageFolder(
-        dataset_path / config["Data"]["test_folder"], transform=transformations["test"]
+        dataset_path / config["Data"]["test_folder"], 
+        transform=transformations["test"],
+        allow_empty=True 
     )
 
     # Create data loaders with optimized settings
