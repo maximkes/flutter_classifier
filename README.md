@@ -20,7 +20,6 @@
 - Python 3.12
 - [Poetry](https://python-poetry.org/docs/) for environment management
 - DVC (опционально)
--
 
 ### Запуск
 

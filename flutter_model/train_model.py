@@ -1,9 +1,13 @@
 from pathlib import Path
 
 import lightning as L
-from lightning.pytorch.callbacks import (DeviceStatsMonitor, EarlyStopping,
-                                         LearningRateMonitor, ModelCheckpoint,
-                                         RichModelSummary)
+from lightning.pytorch.callbacks import (
+    DeviceStatsMonitor,
+    EarlyStopping,
+    LearningRateMonitor,
+    ModelCheckpoint,
+    RichModelSummary,
+)
 from lightning.pytorch.loggers import MLFlowLogger
 
 from .model import LitModel

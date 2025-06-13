@@ -101,7 +101,9 @@ def load_and_preprocess_image(image_path, config):
 @hydra.main(version_base=None, config_path="configs", config_name="config")
 def main(config: DictConfig):
     # Load class names using pathlib
-    class_names = get_class_names_from_dataset("dataset/TRAIN")
+    class_names = get_class_names_from_dataset(
+        config["data"]["dataset_path"] + "/TRAIN"
+    )
 
     if not class_names:
         print("No class names found! Please check your dataset path.")
