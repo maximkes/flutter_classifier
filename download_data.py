@@ -26,7 +26,7 @@ def download_with_progress(url):
 
 @hydra.main(version_base=None, config_path="configs", config_name="config")
 def main(config: DictConfig):
-    url = config["DataLoader"]["yandex_link"]
+    url = config["data_loader"]["yandex_link"]
     base_url = "https://cloud-api.yandex.net/v1/disk/public/resources/download?"
     final_url = base_url + urlencode(dict(public_key=url))
 
@@ -39,8 +39,8 @@ def main(config: DictConfig):
 
     print("Installed successfully")
     zip_file = zipfile.ZipFile(io.BytesIO(download_response_content))
-    zip_file.extractall(config["Data"]["dataset_path"])
-    print(f"Dataset installed to {config['Data']['dataset_path']}")
+    zip_file.extractall(config["data"]["dataset_path"])
+    print(f"Dataset installed to {config["data"]['dataset_path']}")
 
 
 if __name__ == "__main__":
